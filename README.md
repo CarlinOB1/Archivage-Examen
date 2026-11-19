@@ -23,7 +23,7 @@ In the output, you'll find options to open the app in a
 - [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
 - [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Routes Expo Router are defined in **app/**. The tab navigator and its screens live in **app/(tabs)/**, while reusable feature code lives in **src/features/** and shared components in **src/components/**.
 
 ## Get a fresh project
 
@@ -33,7 +33,7 @@ When you're ready, run:
 npm run reset-project
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+This command moves the starter code to the **example** directory and recreates a blank **app/** directory. The current project uses **app/** as its route directory, so running this script replaces the current structure.
 
 ### Other setup steps
 

@@ -11,9 +11,9 @@ import { Pressable, useColorScheme, View, StyleSheet } from 'react-native';
 
 import { Colors, MaxContentWidth, Spacing } from '@/constants/theme';
 
-import { ExternalLink } from './external-link';
-import { ThemedText } from './themed-text';
-import { ThemedView } from './themed-view';
+import { ExternalLink } from '../external-link';
+import { ThemedText } from '../themed-text';
+import { ThemedView } from '../themed-view';
 
 export default function AppTabs() {
   return (
@@ -21,11 +21,20 @@ export default function AppTabs() {
       <TabSlot style={{ height: '100%' }} />
       <TabList asChild>
         <CustomTabList>
-          <TabTrigger name="home" href="/" asChild>
-            <TabButton>Home</TabButton>
+          <TabTrigger name="index" href="/" asChild>
+            <TabButton>Accueil</TabButton>
           </TabTrigger>
           <TabTrigger name="explore" href="/explore" asChild>
-            <TabButton>Explore</TabButton>
+            <TabButton>Explorer</TabButton>
+          </TabTrigger>
+          <TabTrigger name="upload" href="/upload" asChild>
+            <TabButton>Ajouter</TabButton>
+          </TabTrigger>
+          <TabTrigger name="favorites" href="/favorites" asChild>
+            <TabButton>Favoris</TabButton>
+          </TabTrigger>
+          <TabTrigger name="profile" href="/profile" asChild>
+            <TabButton>Profil</TabButton>
           </TabTrigger>
         </CustomTabList>
       </TabList>
@@ -33,9 +42,21 @@ export default function AppTabs() {
   );
 }
 
-export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps) {
+export function TabButton({
+  children,
+  isFocused,
+  onPress,
+  onLongPress,
+  accessibilityRole,
+  accessibilityState,
+}: TabTriggerSlotProps) {
   return (
-    <Pressable {...props} style={({ pressed }) => pressed && styles.pressed}>
+    <Pressable
+      onPress={onPress}
+      onLongPress={onLongPress}
+      accessibilityRole={accessibilityRole}
+      accessibilityState={accessibilityState}
+      style={({ pressed }) => pressed && styles.pressed}>
       <ThemedView
         type={isFocused ? 'backgroundSelected' : 'backgroundElement'}
         style={styles.tabButtonView}>
@@ -55,7 +76,7 @@ export function CustomTabList(props: TabListProps) {
     <View {...props} style={styles.tabListContainer}>
       <ThemedView type="backgroundElement" style={styles.innerContainer}>
         <ThemedText type="smallBold" style={styles.brandText}>
-          Expo Starter
+          Archivage Examen
         </ThemedText>
 
         {props.children}
