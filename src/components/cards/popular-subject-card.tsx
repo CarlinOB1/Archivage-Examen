@@ -16,6 +16,7 @@ const iconNames: Record<Subject['icon'], keyof typeof MaterialIcons.glyphMap> = 
   code: 'code',
   database: 'storage',
   math: 'functions',
+  book: 'menu-book',
 };
 
 export function PopularSubjectCard({ subject, onPress }: PopularSubjectCardProps) {

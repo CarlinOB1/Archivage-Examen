@@ -110,6 +110,58 @@ export default function ProfileScreen() {
           </View>
         </View>
 
+        {/* Espace Administration */}
+        {store.isAdmin ? (
+          <Pressable
+            onPress={() => router.push('/admin' as any)}
+            style={[
+              styles.adminCard,
+              { backgroundColor: theme.backgroundElement, borderColor: theme.primaryBright },
+            ]}>
+            <View style={[styles.adminIconBox, { backgroundColor: `${theme.primaryBright}15` }]}>
+              <MaterialIcons name="admin-panel-settings" size={26} color={theme.primaryBright} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <View style={styles.adminTitleRow}>
+                <Text style={[styles.adminCardTitle, { color: theme.text }]}>Espace Administration</Text>
+                <View style={[styles.adminBadge, { backgroundColor: `${theme.primaryBright}20` }]}>
+                  <Text style={[styles.adminBadgeText, { color: theme.primaryBright }]}>ADMIN</Text>
+                </View>
+              </View>
+              <Text style={[styles.adminCardSubtitle, { color: theme.textSecondary }]}>
+                Modération des dépôts, signalements et catalogue
+              </Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={24} color={theme.primaryBright} />
+          </Pressable>
+        ) : null}
+
+        {/* Espace Modération (uniquement si modérateur mais pas admin) */}
+        {store.isModerator && !store.isAdmin ? (
+          <Pressable
+            onPress={() => router.push('/moderator' as any)}
+            style={[
+              styles.adminCard,
+              { backgroundColor: theme.backgroundElement, borderColor: '#D97706' },
+            ]}>
+            <View style={[styles.adminIconBox, { backgroundColor: '#D9770618' }]}>
+              <MaterialIcons name="verified-user" size={26} color="#D97706" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <View style={styles.adminTitleRow}>
+                <Text style={[styles.adminCardTitle, { color: theme.text }]}>Espace Modération</Text>
+                <View style={[styles.adminBadge, { backgroundColor: '#D9770620' }]}>
+                  <Text style={[styles.adminBadgeText, { color: '#D97706' }]}>MODÉRATEUR</Text>
+                </View>
+              </View>
+              <Text style={[styles.adminCardSubtitle, { color: theme.textSecondary }]}>
+                Révision et validation des documents déposés
+              </Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={24} color="#D97706" />
+          </Pressable>
+        ) : null}
+
         {/* Menu de navigation */}
         <View style={styles.options}>
           {options.map((item) => (
@@ -184,6 +236,44 @@ const styles = StyleSheet.create({
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   label: { fontSize: 13 },
   value: { fontSize: 14, fontWeight: '700', flex: 1, textAlign: 'right' },
+  adminCard: {
+    borderWidth: 1.5,
+    borderRadius: 18,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    marginTop: 14,
+  },
+  adminIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  adminTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  adminCardTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  adminBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  adminBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  adminCardSubtitle: {
+    fontSize: 12,
+    marginTop: 2,
+  },
   options: { marginTop: 14, gap: 8 },
   option: {
     height: 54,

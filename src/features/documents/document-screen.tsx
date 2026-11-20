@@ -5,7 +5,7 @@ import { Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton } from '@/components/ui/app-button';
-import { EmptyState } from '@/components/ui/states';
+import { ConfirmDialog, EmptyState } from '@/components/ui/states';
 import { useResponsive } from '@/hooks/use-responsive';
 import { useTheme } from '@/hooks/use-theme';
 import { useAppStore } from '@/stores/app-store';
@@ -18,6 +18,8 @@ export default function DocumentScreen() {
 
   const [opening, setOpening] = useState(false);
   const [actionError, setActionError] = useState('');
+  const [adminActionLoading, setAdminActionLoading] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   const document = store.documents.find((item) => item.id === id);
 
@@ -72,8 +74,52 @@ export default function DocumentScreen() {
     }
   };
 
+  const handleAdminValidate = async (status: 'Vérifié' | 'Rejeté' | 'Contesté') => {
+    setAdminActionLoading(true);
+    try {
+      await store.validateDocument(document.id, status);
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : 'Erreur modération');
+    } finally {
+      setAdminActionLoading(false);
+    }
+  };
+
+  const handleAdminToggleAvailability = async () => {
+    setAdminActionLoading(true);
+    try {
+      await store.toggleDocumentAvailability(document.id);
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : 'Erreur visibilité');
+    } finally {
+      setAdminActionLoading(false);
+    }
+  };
+
+  const handleAdminDelete = async () => {
+    setAdminActionLoading(true);
+    try {
+      await store.deleteDocument(document.id);
+      router.back();
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : 'Erreur suppression');
+    } finally {
+      setAdminActionLoading(false);
+      setDeleteConfirm(false);
+    }
+  };
+
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]}>
+      {deleteConfirm ? (
+        <ConfirmDialog
+          title="Supprimer ce document ?"
+          message="Cette action est irréversible et supprimera le document de la bibliothèque."
+          confirmLabel="Supprimer"
+          onCancel={() => setDeleteConfirm(false)}
+          onConfirm={() => void handleAdminDelete()}
+        />
+      ) : null}
       <ScrollView
         contentContainerStyle={[
           styles.container,
@@ -179,6 +225,77 @@ export default function DocumentScreen() {
             <AppButton label="Document momentanément indisponible" disabled onPress={() => {}} />
           </View>
         )}
+
+        {/* Actions Modérateur si Admin */}
+        {store.isAdmin ? (
+          <View
+            style={[
+              styles.adminBox,
+              { backgroundColor: theme.backgroundElement, borderColor: theme.primaryBright },
+            ]}>
+            <View style={styles.adminBoxHeader}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <MaterialIcons name="security" size={18} color={theme.primaryBright} />
+                <Text style={[styles.adminBoxTitle, { color: theme.text }]}>Actions Modérateur</Text>
+              </View>
+              <Text style={{ fontSize: 11, fontWeight: '700', color: theme.primaryBright }}>
+                PANNEAU ADMIN
+              </Text>
+            </View>
+
+            <View style={styles.adminActionRow}>
+              {document.validationStatus !== 'Vérifié' ? (
+                <Pressable
+                  disabled={adminActionLoading}
+                  onPress={() => void handleAdminValidate('Vérifié')}
+                  style={[styles.adminBtn, { backgroundColor: '#16A34A' }]}>
+                  <MaterialIcons name="check" size={16} color="#fff" />
+                  <Text style={styles.adminBtnText}>Valider</Text>
+                </Pressable>
+              ) : (
+                <Pressable
+                  disabled={adminActionLoading}
+                  onPress={() => void handleAdminValidate('Contesté')}
+                  style={[styles.adminBtn, { backgroundColor: '#FFEDD5' }]}>
+                  <MaterialIcons name="warning" size={16} color="#EA580C" />
+                  <Text style={[styles.adminBtnText, { color: '#EA580C' }]}>Contester</Text>
+                </Pressable>
+              )}
+
+              {document.validationStatus !== 'Rejeté' ? (
+                <Pressable
+                  disabled={adminActionLoading}
+                  onPress={() => void handleAdminValidate('Rejeté')}
+                  style={[styles.adminBtn, { backgroundColor: '#FEE2E2' }]}>
+                  <MaterialIcons name="close" size={16} color="#DC2626" />
+                  <Text style={[styles.adminBtnText, { color: '#DC2626' }]}>Rejeter</Text>
+                </Pressable>
+              ) : null}
+
+              <Pressable
+                disabled={adminActionLoading}
+                onPress={() => void handleAdminToggleAvailability()}
+                style={[styles.adminBtn, { backgroundColor: theme.backgroundSelected }]}>
+                <MaterialIcons
+                  name={document.availabilityStatus === 'Disponible' ? 'visibility-off' : 'visibility'}
+                  size={16}
+                  color={theme.text}
+                />
+                <Text style={[styles.adminBtnText, { color: theme.text }]}>
+                  {document.availabilityStatus === 'Disponible' ? 'Masquer' : 'Publier'}
+                </Text>
+              </Pressable>
+
+              <Pressable
+                disabled={adminActionLoading}
+                onPress={() => setDeleteConfirm(true)}
+                style={[styles.adminBtn, { backgroundColor: '#FEF2F2' }]}>
+                <MaterialIcons name="delete" size={16} color="#DC2626" />
+                <Text style={[styles.adminBtnText, { color: '#DC2626' }]}>Supprimer</Text>
+              </Pressable>
+            </View>
+          </View>
+        ) : null}
 
         {/* Signaler */}
         <Pressable
@@ -298,5 +415,39 @@ const styles = StyleSheet.create({
     color: '#B42318',
     marginTop: 8,
     fontSize: 13,
+  },
+  adminBox: {
+    borderWidth: 1.5,
+    borderRadius: 16,
+    padding: 14,
+    marginTop: 18,
+    gap: 12,
+  },
+  adminBoxHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  adminBoxTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  adminActionRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  adminBtn: {
+    flex: 1,
+    height: 38,
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  adminBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#fff',
   },
 });

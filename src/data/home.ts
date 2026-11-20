@@ -2,7 +2,7 @@ export type Subject = {
   id: string;
   name: string;
   documentCount: number;
-  icon: 'network' | 'code' | 'database' | 'math';
+  icon: 'network' | 'code' | 'database' | 'math' | 'book';
 };
 
 export type RecentResource = {

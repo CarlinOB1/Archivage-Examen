@@ -1,4 +1,13 @@
-import type { AcademicDocument, AppNotification, AppUser, Subject } from '@/types/models';
+import type {
+  AcademicDocument,
+  AdminStats,
+  AppNotification,
+  AppUser,
+  DocumentReport,
+  ModerationAction,
+  Subject,
+  UserProfile,
+} from '@/types/models';
 
 export const subjects: Subject[] = [
   { id: 'reseaux', name: 'Réseaux', description: 'Protocoles, architectures, routage et services réseau.', iconKey: 'network', documentCount: 24 },
@@ -105,6 +114,9 @@ export const mockUser: AppUser = {
   university: 'Université Marien Ngouabi',
   programme: 'Informatique',
   level: 'Licence 3',
+  role: 'admin',
+  isAdmin: true,
+  isModerator: true,
 };
 
 export const notifications: AppNotification[] = [
@@ -112,3 +124,141 @@ export const notifications: AppNotification[] = [
   { id: 'n2', title: 'Nouvelle ressource', message: 'Un corrigé d’algorithmique a été ajouté.', createdAt: 'Hier, 09:15', isRead: false },
   { id: 'n3', title: 'Favori disponible', message: 'Le document « Examen Réseaux » est à nouveau disponible.', createdAt: '16/11/2026', isRead: true },
 ];
+
+export const mockReports: DocumentReport[] = [
+  {
+    id: 'rep-1',
+    documentId: 'devoir-bdd-l2-2025',
+    documentTitle: 'Devoir Bases de données',
+    documentSubject: 'Bases de données',
+    reporterId: 'user-2',
+    reporterName: 'Carlin Okana',
+    reason: 'incorrect_document',
+    reasonLabel: 'Document incorrect',
+    comment: 'Le sujet ne correspond pas au devoir 2024-2025, il manque l’exercice 3.',
+    status: 'open',
+    createdAt: '18/11/2026 10:15',
+  },
+  {
+    id: 'rep-2',
+    documentId: 'cours-mathematiques-l1-2025',
+    documentTitle: 'Support Mathématiques Licence 1',
+    documentSubject: 'Mathématiques',
+    reporterId: 'user-3',
+    reporterName: 'Laetitia Koumba',
+    reason: 'unreadable_content',
+    reasonLabel: 'Contenu illisible',
+    comment: 'Les pages 14 et 15 sont coupées et très sombres.',
+    status: 'reviewing',
+    createdAt: '16/11/2026 14:40',
+  },
+  {
+    id: 'rep-3',
+    documentId: 'examen-reseaux-l3-2025',
+    documentTitle: 'Examen Réseaux informatiques',
+    documentSubject: 'Réseaux',
+    reporterId: 'user-4',
+    reporterName: 'Benoît D.',
+    reason: 'wrong_format',
+    reasonLabel: 'Format erroné',
+    comment: 'Signalement résolu : le document a été rechargé en format vectoriel propre.',
+    status: 'resolved',
+    createdAt: '12/11/2026 09:20',
+  },
+];
+
+export const mockUsers: UserProfile[] = [
+  {
+    id: 'user-1',
+    firstName: 'Life',
+    lastName: 'Mpandzou',
+    email: 'life.mpandzou@example.com',
+    university: 'Université Marien Ngouabi',
+    programme: 'Informatique',
+    level: 'Licence 3',
+    createdAt: '01/10/2026',
+    documentCount: 8,
+    role: 'admin',
+  },
+  {
+    id: 'user-2',
+    firstName: 'Carlin',
+    lastName: 'Okana',
+    email: 'carlin.o@example.com',
+    university: 'Université Marien Ngouabi',
+    programme: 'Informatique',
+    level: 'Licence 3',
+    createdAt: '05/10/2026',
+    documentCount: 12,
+    role: 'user',
+  },
+  {
+    id: 'user-3',
+    firstName: 'Laetitia',
+    lastName: 'Koumba',
+    email: 'laetitia.k@example.com',
+    university: 'Université Marien Ngouabi',
+    programme: 'Informatique',
+    level: 'Licence 2',
+    createdAt: '12/10/2026',
+    documentCount: 4,
+    role: 'user',
+  },
+  {
+    id: 'user-4',
+    firstName: 'Équipe',
+    lastName: 'Pédagogique',
+    email: 'pedagogie@umng.cg',
+    university: 'Université Marien Ngouabi',
+    programme: 'Mathématiques & Informatique',
+    level: 'Enseignants',
+    createdAt: '15/09/2026',
+    documentCount: 25,
+    role: 'admin',
+  },
+];
+
+export const mockAdminStats: AdminStats = {
+  totalDocuments: 4,
+  pendingDocuments: 1,
+  verifiedDocuments: 2,
+  disputedDocuments: 1,
+  rejectedDocuments: 0,
+  totalReports: 3,
+  openReports: 1,
+  totalUsers: 4,
+  totalSubjects: 4,
+  totalDownloads: 479,
+};
+
+export const mockModerationHistory: ModerationAction[] = [
+  {
+    id: 'mod-act-1',
+    documentId: 'examen-reseaux-l3-2025',
+    documentTitle: 'Examen Réseaux informatiques',
+    moderatorName: 'Life Mpandzou',
+    decision: 'Vérifié',
+    reason: 'Document conforme au programme, haute lisibilité et suppression des données étudiantes validée.',
+    createdAt: '18/11/2026 11:20',
+  },
+  {
+    id: 'mod-act-2',
+    documentId: 'corrige-algorithmique-l2-2024',
+    documentTitle: 'Corrigé Algorithmique',
+    moderatorName: 'Life Mpandzou',
+    decision: 'Vérifié',
+    reason: 'Corrigé complet et détaillé conforme au sujet officiel de la session normale.',
+    createdAt: '16/11/2026 15:45',
+  },
+  {
+    id: 'mod-act-3',
+    documentId: 'cours-mathematiques-l1-2025',
+    documentTitle: 'Support Mathématiques Licence 1',
+    moderatorName: 'Équipe pédagogique',
+    decision: 'Contesté',
+    reason: 'Pages 14 et 15 tronquées et illisibles. Demande de nouveau scan adressée au contributeur.',
+    createdAt: '15/11/2026 16:30',
+  },
+];
+
+

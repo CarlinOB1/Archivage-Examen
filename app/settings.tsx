@@ -65,6 +65,36 @@ export default function SettingsScreen() {
           </Pressable>
         ))}
 
+        {store.isAdmin ? (
+          <>
+            <Text style={[styles.section, { color: theme.textSecondary }]}>Administration</Text>
+            <Pressable
+              onPress={() => router.push('/admin' as any)}
+              style={[styles.option, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+              <View style={styles.optionLeft}>
+                <MaterialIcons name="admin-panel-settings" size={20} color={theme.primaryBright} />
+                <Text style={{ color: theme.text, fontWeight: '700' }}>Tableau de bord administrateur</Text>
+              </View>
+              <MaterialIcons name="chevron-right" size={22} color={theme.textSecondary} />
+            </Pressable>
+          </>
+        ) : null}
+
+        {store.isModerator && !store.isAdmin ? (
+          <>
+            <Text style={[styles.section, { color: theme.textSecondary }]}>Modération</Text>
+            <Pressable
+              onPress={() => router.push('/moderator' as any)}
+              style={[styles.option, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+              <View style={styles.optionLeft}>
+                <MaterialIcons name="verified-user" size={20} color="#D97706" />
+                <Text style={{ color: theme.text, fontWeight: '700' }}>Tableau de bord modérateur</Text>
+              </View>
+              <MaterialIcons name="chevron-right" size={22} color={theme.textSecondary} />
+            </Pressable>
+          </>
+        ) : null}
+
         <Text style={[styles.section, { color: theme.textSecondary }]}>Compte</Text>
         <Pressable
           onPress={() => setLogout(true)}
