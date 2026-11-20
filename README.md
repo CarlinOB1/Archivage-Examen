@@ -2,6 +2,24 @@
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
+## Supabase
+
+The app uses Supabase Auth, Postgres and Storage. Copy `.env.example` to `.env.local`, then fill in the project's publishable key from **Supabase Dashboard → Project Settings → API Keys**:
+
+```powershell
+Copy-Item .env.example .env.local
+```
+
+Set `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `.env.local`. The project URL is already provided. The publishable key is intended for client applications; never put a `service_role` or secret key in an `EXPO_PUBLIC_` variable. `.env.local` is ignored by Git.
+
+Restart Expo after changing environment variables:
+
+```bash
+npx expo start --clear
+```
+
+The schema and RLS policies are in [`supabase/migrations/20261120061500_initial_schema.sql`](./supabase/migrations/20261120061500_initial_schema.sql), with an overview in [`database-schema.md`](./database-schema.md). Add both `archivageexamen://auth/callback` and `archivageexamen://auth/reset-password` to the allowed redirect URLs in Supabase Auth.
+
 ## Get started
 
 1. Install dependencies

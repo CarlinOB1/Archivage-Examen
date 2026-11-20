@@ -1,180 +1,82 @@
-import { Image } from 'expo-image';
-import { SymbolView } from 'expo-symbols';
-import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-import { ExternalLink } from '@/components/external-link';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Collapsible } from '@/components/ui/collapsible';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { ChevronRight, Search } from 'lucide-react-native';
+import { EmptyState } from '@/components/ui/states';
 import { useTheme } from '@/hooks/use-theme';
+import { useAppStore } from '@/stores/app-store';
+import { BottomTabInset } from '@/constants/theme';
+import { useResponsive } from '@/hooks/use-responsive';
 
-export default function TabTwoScreen() {
-  const safeAreaInsets = useSafeAreaInsets();
-  const insets = {
-    ...safeAreaInsets,
-    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
-  };
+export default function ExploreScreen() {
   const theme = useTheme();
-
-  const contentPlatformStyle = Platform.select({
-    android: {
-      paddingTop: insets.top,
-      paddingLeft: insets.left,
-      paddingRight: insets.right,
-      paddingBottom: insets.bottom,
-    },
-    web: {
-      paddingTop: Spacing.six,
-      paddingBottom: Spacing.four,
-    },
-  });
+  const responsive = useResponsive();
+  const params = useLocalSearchParams<{ subject?: string }>();
+  const store = useAppStore();
+  const [query, setQuery] = useState('');
+  const [subjectFilter, setSubjectFilter] = useState(params.subject ? String(params.subject) : 'Toutes');
+  const [levelFilter, setLevelFilter] = useState('Tous');
+  const results = useMemo(() => store.documents.filter((doc) => {
+    const subjectOk = subjectFilter === 'Toutes' || doc.subjectName === subjectFilter;
+    const levelOk = levelFilter === 'Tous' || doc.level === levelFilter;
+    const queryOk = !query || `${doc.title} ${doc.subjectName}`.toLowerCase().includes(query.toLowerCase());
+    return subjectOk && levelOk && queryOk;
+  }), [store.documents, subjectFilter, levelFilter, query]);
 
   return (
-    <ScrollView
-      style={[styles.scrollView, { backgroundColor: theme.background }]}
-      contentInset={insets}
-      contentContainerStyle={[styles.contentContainer, contentPlatformStyle]}>
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="subtitle">Explore</ThemedText>
-          <ThemedText style={styles.centerText} themeColor="textSecondary">
-            This starter app includes example{'\n'}code to help you get started.
-          </ThemedText>
-
-          <ExternalLink href="https://docs.expo.dev" asChild>
-            <Pressable style={({ pressed }) => pressed && styles.pressed}>
-              <ThemedView type="backgroundElement" style={styles.linkButton}>
-                <ThemedText type="link">Expo documentation</ThemedText>
-                <SymbolView
-                  tintColor={theme.text}
-                  name={{ ios: 'arrow.up.right.square', android: 'link', web: 'link' }}
-                  size={12}
-                />
-              </ThemedView>
+    <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]}>
+      <ScrollView contentContainerStyle={[
+        styles.container,
+        {
+          maxWidth: responsive.contentMaxWidth,
+          paddingHorizontal: responsive.horizontalPadding,
+          paddingBottom: responsive.isSmall ? 72 : BottomTabInset + 24,
+        },
+      ]}>
+        <Text style={[styles.title, { color: theme.text }]}>Explorer</Text>
+        <View style={[styles.search, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+          <Search size={20} color={theme.textSecondary} />
+          <TextInput value={query} onChangeText={setQuery} placeholder="Rechercher une ressource" placeholderTextColor={theme.textSecondary} style={[styles.input, { color: theme.text }]} />
+        </View>
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>Matières</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+          {['Toutes', ...store.subjects.map((subject) => subject.name)].map((subject) => (
+            <Pressable key={subject} onPress={() => setSubjectFilter(subject)} style={[styles.chip, { borderColor: theme.border, backgroundColor: subjectFilter === subject ? theme.primary : theme.backgroundElement }]}>
+              <Text style={{ color: subjectFilter === subject ? '#fff' : theme.text, fontWeight: '700', fontSize: 13 }}>{subject}</Text>
             </Pressable>
-          </ExternalLink>
-        </ThemedView>
-
-        <ThemedView style={styles.sectionsWrapper}>
-          <Collapsible title="File-based routing">
-            <ThemedText type="small">
-              The tab screens are <ThemedText type="code">app/(tabs)/index.tsx</ThemedText> and{' '}
-              <ThemedText type="code">app/(tabs)/explore.tsx</ThemedText>
-            </ThemedText>
-            <ThemedText type="small">
-              The layout file in <ThemedText type="code">app/(tabs)/_layout.tsx</ThemedText> sets
-              up the tab navigator.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/router/introduction">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Android, iOS, and web support">
-            <ThemedView type="backgroundElement" style={styles.collapsibleContent}>
-              <ThemedText type="small">
-                You can open this project on Android, iOS, and the web. To open the web version,
-                press <ThemedText type="smallBold">w</ThemedText> in the terminal running this
-                project.
-              </ThemedText>
-              <Image
-                source={require('@/assets/images/tutorial-web.png')}
-                style={styles.imageTutorial}
-              />
-            </ThemedView>
-          </Collapsible>
-
-          <Collapsible title="Images">
-            <ThemedText type="small">
-              For static images, you can use the <ThemedText type="code">@2x</ThemedText> and{' '}
-              <ThemedText type="code">@3x</ThemedText> suffixes to provide files for different
-              screen densities.
-            </ThemedText>
-            <Image source={require('@/assets/images/react-logo.png')} style={styles.imageReact} />
-            <ExternalLink href="https://reactnative.dev/docs/images">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Light and dark mode components">
-            <ThemedText type="small">
-              This template has light and dark mode support. The{' '}
-              <ThemedText type="code">useColorScheme()</ThemedText> hook lets you inspect what the
-              user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Animations">
-            <ThemedText type="small">
-              This template includes an example of an animated component. The{' '}
-              <ThemedText type="code">src/components/ui/collapsible.tsx</ThemedText> component uses
-              the powerful <ThemedText type="code">react-native-reanimated</ThemedText> library to
-              animate opening this hint.
-            </ThemedText>
-          </Collapsible>
-        </ThemedView>
-        {Platform.OS === 'web' && <WebBadge />}
-      </ThemedView>
-    </ScrollView>
+          ))}
+        </ScrollView>
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>Niveau</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+          {['Tous', 'Licence 1', 'Licence 2', 'Licence 3'].map((level) => (
+            <Pressable key={level} onPress={() => setLevelFilter(level)} style={[styles.chip, { borderColor: theme.border, backgroundColor: levelFilter === level ? theme.primary : theme.backgroundElement }]}>
+              <Text style={{ color: levelFilter === level ? '#fff' : theme.text, fontWeight: '700', fontSize: 13 }}>{level}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+        <View style={styles.resultHeader}><Text style={[styles.sectionTitle, { color: theme.text }]}>Résultats</Text><Text style={{ color: theme.textSecondary }}>{results.length} document(s)</Text></View>
+        {results.length ? results.map((document) => (
+          <Pressable key={document.id} onPress={() => router.push(`/documents/${document.id}`)} style={[styles.card, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+            <View style={{ flex: 1 }}><Text style={[styles.cardTitle, { color: theme.text }]}>{document.title}</Text><Text style={{ color: theme.textSecondary, marginTop: 4 }}>{document.subjectName} · {document.level} · {document.academicYear}</Text></View>
+            <ChevronRight color={theme.textSecondary} size={20} />
+          </Pressable>
+        )) : <EmptyState title="Aucun résultat" description="Modifiez les mots-clés ou réinitialisez les filtres." actionLabel="Réinitialiser" onAction={() => { setQuery(''); setSubjectFilter('Toutes'); setLevelFilter('Tous'); }} />}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
-  contentContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  container: {
-    maxWidth: MaxContentWidth,
-    flexGrow: 1,
-  },
-  titleContainer: {
-    gap: Spacing.three,
-    alignItems: 'center',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.six,
-  },
-  centerText: {
-    textAlign: 'center',
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-  linkButton: {
-    flexDirection: 'row',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
-    justifyContent: 'center',
-    gap: Spacing.one,
-    alignItems: 'center',
-  },
-  sectionsWrapper: {
-    gap: Spacing.five,
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
-  },
-  collapsibleContent: {
-    alignItems: 'center',
-  },
-  imageTutorial: {
-    width: '100%',
-    aspectRatio: 296 / 171,
-    borderRadius: Spacing.three,
-    marginTop: Spacing.two,
-  },
-  imageReact: {
-    width: 100,
-    height: 100,
-    alignSelf: 'center',
-  },
+  safe: { flex: 1 },
+  container: { width: '100%', maxWidth: 800, alignSelf: 'center', padding: 16, paddingBottom: BottomTabInset + 24 },
+  title: { fontSize: 30, fontWeight: '800', marginBottom: 16 },
+  search: { height: 52, borderRadius: 14, borderWidth: 1, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14 },
+  input: { flex: 1, height: '100%', paddingHorizontal: 10 },
+  sectionTitle: { fontSize: 17, fontWeight: '800', marginTop: 18 },
+  chips: { gap: 8, paddingVertical: 10 },
+  chip: { height: 38, borderRadius: 19, borderWidth: 1, paddingHorizontal: 14, justifyContent: 'center' },
+  resultHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  card: { marginTop: 10, borderRadius: 14, borderWidth: 1, padding: 14, flexDirection: 'row', alignItems: 'center' },
+  cardTitle: { fontSize: 15, fontWeight: '800' },
 });

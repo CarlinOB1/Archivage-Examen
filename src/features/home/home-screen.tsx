@@ -1,19 +1,37 @@
 import { router } from 'expo-router';
 import { Bell, Search, UserRound } from 'lucide-react-native';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PopularSubjectCard } from '@/components/cards/popular-subject-card';
 import { RecentResourceCard } from '@/components/cards/recent-resource-card';
 import { ThemedText } from '@/components/themed-text';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { popularSubjects, recentResources } from '@/data/home';
 import { useTheme } from '@/hooks/use-theme';
+import { useResponsive } from '@/hooks/use-responsive';
+import { useAppStore } from '@/stores/app-store';
 
 export default function HomeScreen() {
   const theme = useTheme();
+  const responsive = useResponsive();
+  const store = useAppStore();
   const [searchQuery, setSearchQuery] = useState('');
+  const popularSubjects = store.subjects.map((subject) => ({
+    id: subject.id,
+    name: subject.name,
+    documentCount: subject.documentCount,
+    icon: subject.iconKey,
+  }));
+  const recentResources = store.documents.slice(0, 4).map((document) => ({
+    id: document.id,
+    title: document.title,
+    subject: document.subjectName,
+    level: document.level,
+    year: document.academicYear,
+    type: document.type,
+    downloads: document.downloadCount,
+  }));
 
   const submitSearch = () => {
     const query = searchQuery.trim();
@@ -24,10 +42,17 @@ export default function HomeScreen() {
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={[
+          styles.contentContainer,
+          {
+            maxWidth: responsive.contentMaxWidth,
+            paddingHorizontal: responsive.horizontalPadding,
+            paddingBottom: responsive.isSmall ? 72 : BottomTabInset + Spacing.five,
+          },
+        ]}
         showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <View>
+          <View style={Platform.OS === 'web' ? styles.webBrandHidden : undefined}>
             <ThemedText style={styles.brandName}>Archivage</ThemedText>
             <ThemedText themeColor="textSecondary" style={styles.brandSubtitle}>
               Examen
@@ -45,7 +70,9 @@ export default function HomeScreen() {
                 pressed && styles.pressed,
               ]}>
               <Bell size={21} color={theme.primary} />
-              <View style={[styles.notificationDot, { borderColor: theme.background }]} />
+              {store.notifications.some((notification) => !notification.isRead) ? (
+                <View style={[styles.notificationDot, { borderColor: theme.background }]} />
+              ) : null}
             </Pressable>
             <Pressable
               accessibilityRole="button"
@@ -62,7 +89,9 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.welcome}>
-          <ThemedText style={styles.welcomeTitle}>Bonjour, étudiant</ThemedText>
+          <ThemedText style={styles.welcomeTitle}>
+            Bonjour{store.user.firstName ? `, ${store.user.firstName}` : ', étudiant'}
+          </ThemedText>
           <ThemedText themeColor="textSecondary" style={styles.welcomeSubtitle}>
             Que souhaitez-vous réviser aujourd’hui ?
           </ThemedText>
@@ -116,6 +145,11 @@ export default function HomeScreen() {
                 }
               />
             ))}
+            {!popularSubjects.length ? (
+              <ThemedText themeColor="textSecondary">
+                {store.isLoading ? 'Chargement des matières…' : 'Aucune matière disponible.'}
+              </ThemedText>
+            ) : null}
           </ScrollView>
         </View>
 
@@ -134,6 +168,11 @@ export default function HomeScreen() {
                 onPress={() => router.push(`/documents/${resource.id}`)}
               />
             ))}
+            {!recentResources.length ? (
+              <ThemedText themeColor="textSecondary">
+                {store.isLoading ? 'Chargement des documents…' : 'Aucun document publié pour le moment.'}
+              </ThemedText>
+            ) : null}
           </View>
         </View>
       </ScrollView>
@@ -144,6 +183,9 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+  },
+  webBrandHidden: {
+    display: 'none',
   },
   scrollView: {
     flex: 1,
@@ -173,6 +215,7 @@ const styles = StyleSheet.create({
   headerActions: {
     flexDirection: 'row',
     gap: Spacing.two,
+    marginLeft: Platform.OS === 'web' ? 'auto' : 0,
   },
   iconButton: {
     width: 44,

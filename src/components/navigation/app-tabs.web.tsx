@@ -7,9 +7,10 @@ import {
   TabListProps,
 } from 'expo-router/ui';
 import { SymbolView } from 'expo-symbols';
-import { Pressable, useColorScheme, View, StyleSheet } from 'react-native';
+import { Pressable, View, StyleSheet } from 'react-native';
 
-import { Colors, MaxContentWidth, Spacing } from '@/constants/theme';
+import { Colors, Spacing } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { ExternalLink } from '../external-link';
 import { ThemedText } from '../themed-text';
@@ -18,7 +19,6 @@ import { ThemedView } from '../themed-view';
 export default function AppTabs() {
   return (
     <Tabs>
-      <TabSlot style={{ height: '100%' }} />
       <TabList asChild>
         <CustomTabList>
           <TabTrigger name="index" href="/" asChild>
@@ -38,6 +38,7 @@ export default function AppTabs() {
           </TabTrigger>
         </CustomTabList>
       </TabList>
+      <TabSlot style={{ height: 'calc(100dvh - 72px)', minHeight: 0 }} />
     </Tabs>
   );
 }
@@ -98,22 +99,24 @@ export function CustomTabList(props: TabListProps) {
 
 const styles = StyleSheet.create({
   tabListContainer: {
-    position: 'absolute',
+    position: 'relative',
+    height: 72,
     width: '100%',
-    padding: Spacing.three,
+    paddingHorizontal: Spacing.three,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
   },
   innerContainer: {
-    paddingVertical: Spacing.two,
+    height: 72,
     paddingHorizontal: Spacing.five,
-    borderRadius: Spacing.five,
     flexDirection: 'row',
     alignItems: 'center',
     flexGrow: 1,
     gap: Spacing.two,
-    maxWidth: MaxContentWidth,
+    maxWidth: 1200,
+    borderBottomWidth: 1,
+    borderBottomColor: '#DFE7F1',
   },
   brandText: {
     marginRight: 'auto',
