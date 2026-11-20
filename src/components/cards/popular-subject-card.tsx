@@ -1,4 +1,4 @@
-import { Calculator, Code2, Database, Network } from 'lucide-react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -11,16 +11,16 @@ type PopularSubjectCardProps = {
   onPress: () => void;
 };
 
-const icons = {
-  network: Network,
-  code: Code2,
-  database: Database,
-  math: Calculator,
+const iconNames: Record<Subject['icon'], keyof typeof MaterialIcons.glyphMap> = {
+  network: 'lan',
+  code: 'code',
+  database: 'storage',
+  math: 'functions',
 };
 
 export function PopularSubjectCard({ subject, onPress }: PopularSubjectCardProps) {
   const theme = useTheme();
-  const Icon = icons[subject.icon];
+  const iconName = iconNames[subject.icon] ?? 'folder';
 
   return (
     <Pressable
@@ -33,7 +33,7 @@ export function PopularSubjectCard({ subject, onPress }: PopularSubjectCardProps
         pressed && styles.pressed,
       ]}>
       <View style={[styles.iconContainer, { backgroundColor: theme.backgroundSelected }]}>
-        <Icon size={22} color={theme.primaryBright} strokeWidth={2} />
+        <MaterialIcons name={iconName} size={22} color={theme.primaryBright} />
       </View>
       <ThemedText type="smallBold" numberOfLines={2} style={styles.name}>
         {subject.name}

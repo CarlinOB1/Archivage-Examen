@@ -71,6 +71,7 @@ type AppStore = {
   uploadDocument: (input: UploadDocumentInput) => Promise<void>;
   submitReport: (documentId: string, reason: string, comment: string) => Promise<void>;
   getDocumentUrl: (documentId: string, trackDownload?: boolean) => Promise<string>;
+  refresh: () => Promise<void>;
 };
 
 const emptyUser: AppUser = {
@@ -504,6 +505,12 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     return data.signedUrl;
   }), [userId, withError]);
 
+  const refresh = useCallback(async () => {
+    if (!supabase) return;
+    const { data: sessionData } = await supabase.auth.getSession();
+    await loadData(sessionData.session?.user ?? null);
+  }, [loadData]);
+
   const value = useMemo<AppStore>(() => ({
     documents,
     subjects,
@@ -526,10 +533,12 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     uploadDocument,
     submitReport,
     getDocumentUrl,
+    refresh,
   }), [
     documents, subjects, notifications, user, isAuthenticated, isLoading, error,
     signIn, signUp, resetPassword, updatePassword, logout, updateUser, toggleFavorite,
     markNotificationRead, markAllNotificationsRead, uploadDocument, submitReport, getDocumentUrl,
+    refresh,
   ]);
 
   return (

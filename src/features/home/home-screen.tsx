@@ -1,15 +1,23 @@
+import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Bell, Search, UserRound } from 'lucide-react-native';
-import { useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import {
+  Platform,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PopularSubjectCard } from '@/components/cards/popular-subject-card';
 import { RecentResourceCard } from '@/components/cards/recent-resource-card';
 import { ThemedText } from '@/components/themed-text';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
 import { useResponsive } from '@/hooks/use-responsive';
+import { useTheme } from '@/hooks/use-theme';
 import { useAppStore } from '@/stores/app-store';
 
 export default function HomeScreen() {
@@ -17,12 +25,24 @@ export default function HomeScreen() {
   const responsive = useResponsive();
   const store = useAppStore();
   const [searchQuery, setSearchQuery] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await store.refresh();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [store]);
+
   const popularSubjects = store.subjects.map((subject) => ({
     id: subject.id,
     name: subject.name,
     documentCount: subject.documentCount,
     icon: subject.iconKey,
   }));
+
   const recentResources = store.documents.slice(0, 4).map((document) => ({
     id: document.id,
     title: document.title,
@@ -42,6 +62,14 @@ export default function HomeScreen() {
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <ScrollView
         style={styles.scrollView}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[theme.primaryBright]}
+            tintColor={theme.primaryBright}
+          />
+        }
         contentContainerStyle={[
           styles.contentContainer,
           {
@@ -55,7 +83,7 @@ export default function HomeScreen() {
           <View style={Platform.OS === 'web' ? styles.webBrandHidden : undefined}>
             <ThemedText style={styles.brandName}>Archivage</ThemedText>
             <ThemedText themeColor="textSecondary" style={styles.brandSubtitle}>
-              Examen
+              Examen · Université Marien Ngouabi
             </ThemedText>
           </View>
 
@@ -69,7 +97,7 @@ export default function HomeScreen() {
                 { backgroundColor: theme.backgroundElement, borderColor: theme.border },
                 pressed && styles.pressed,
               ]}>
-              <Bell size={21} color={theme.primary} />
+              <MaterialIcons name="notifications-none" size={22} color={theme.primary} />
               {store.notifications.some((notification) => !notification.isRead) ? (
                 <View style={[styles.notificationDot, { borderColor: theme.background }]} />
               ) : null}
@@ -83,7 +111,7 @@ export default function HomeScreen() {
                 { backgroundColor: theme.primary },
                 pressed && styles.pressed,
               ]}>
-              <UserRound size={21} color="#FFFFFF" />
+              <MaterialIcons name="person" size={22} color="#FFFFFF" />
             </Pressable>
           </View>
         </View>
@@ -102,16 +130,21 @@ export default function HomeScreen() {
             styles.searchBar,
             { backgroundColor: theme.backgroundElement, borderColor: theme.border },
           ]}>
-          <Search size={20} color={theme.textSecondary} />
+          <MaterialIcons name="search" size={22} color={theme.textSecondary} />
           <TextInput
             value={searchQuery}
             onChangeText={setSearchQuery}
             onSubmitEditing={submitSearch}
-            placeholder="Rechercher une matière ou un document"
+            placeholder="Rechercher une matière, un examen ou un cours"
             placeholderTextColor={theme.textSecondary}
             returnKeyType="search"
             style={[styles.searchInput, { color: theme.text }]}
           />
+          {searchQuery ? (
+            <Pressable onPress={() => setSearchQuery('')} hitSlop={8}>
+              <MaterialIcons name="close" size={20} color={theme.textSecondary} />
+            </Pressable>
+          ) : null}
         </View>
 
         <View style={styles.section}>
@@ -206,7 +239,7 @@ const styles = StyleSheet.create({
   brandName: {
     fontSize: 20,
     lineHeight: 24,
-    fontWeight: 800,
+    fontWeight: '800',
   },
   brandSubtitle: {
     fontSize: 12,
@@ -251,7 +284,7 @@ const styles = StyleSheet.create({
   welcomeTitle: {
     fontSize: 23,
     lineHeight: 30,
-    fontWeight: 800,
+    fontWeight: '800',
   },
   welcomeSubtitle: {
     marginTop: 2,
@@ -287,7 +320,7 @@ const styles = StyleSheet.create({
   },
   sectionActionText: {
     fontSize: 13,
-    fontWeight: 700,
+    fontWeight: '700',
   },
   subjectsRow: {
     gap: Spacing.two,

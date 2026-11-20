@@ -1,4 +1,4 @@
-import { ChevronRight, Download, FileText } from 'lucide-react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -31,7 +31,7 @@ export function RecentResourceCard({ resource, onPress }: RecentResourceCardProp
         pressed && styles.pressed,
       ]}>
       <View style={[styles.documentIcon, { backgroundColor: `${typeColor}18` }]}>
-        <FileText size={22} color={typeColor} strokeWidth={2} />
+        <MaterialIcons name="description" size={24} color={typeColor} />
       </View>
 
       <View style={styles.content}>
@@ -42,17 +42,17 @@ export function RecentResourceCard({ resource, onPress }: RecentResourceCardProp
           {resource.title}
         </ThemedText>
         <ThemedText themeColor="textSecondary" numberOfLines={1} style={styles.meta}>
-          {resource.level} · {resource.year}
+          {resource.subject} · {resource.level} · {resource.year}
         </ThemedText>
         <View style={styles.downloads}>
-          <Download size={13} color={theme.textSecondary} />
+          <MaterialIcons name="file-download" size={14} color={theme.textSecondary} />
           <ThemedText themeColor="textSecondary" style={styles.downloadText}>
-            {resource.downloads}
+            {resource.downloads} téléchargements
           </ThemedText>
         </View>
       </View>
 
-      <ChevronRight size={20} color={theme.textSecondary} />
+      <MaterialIcons name="chevron-right" size={22} color={theme.textSecondary} />
     </Pressable>
   );
 }
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
   typeText: {
     fontSize: 11,
     lineHeight: 15,
-    fontWeight: 700,
+    fontWeight: '700',
   },
   title: {
     marginBottom: 3,
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 4,
   },
   downloadText: {
     fontSize: 11,

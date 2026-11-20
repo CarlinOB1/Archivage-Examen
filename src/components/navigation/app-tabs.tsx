@@ -1,5 +1,6 @@
-import { NativeTabs } from 'expo-router/native-tabs';
-import { useColorScheme } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
+import { Platform, useColorScheme } from 'react-native';
 
 import { Colors } from '@/constants/theme';
 
@@ -8,37 +9,73 @@ export default function AppTabs() {
   const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];
 
   return (
-    <NativeTabs
-      backgroundColor={colors.background}
-      indicatorColor={colors.backgroundElement}
-      labelStyle={{ selected: { color: colors.text } }}>
-      <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Label>Accueil</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/home.png')}
-          renderingMode="template"
-        />
-      </NativeTabs.Trigger>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: colors.primaryBright,
+        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarStyle: {
+          backgroundColor: colors.backgroundElement,
+          borderTopColor: colors.border,
+          borderTopWidth: 1,
+          height: Platform.OS === 'ios' ? 84 : 64,
+          paddingBottom: Platform.OS === 'ios' ? 24 : 8,
+          paddingTop: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '700',
+        },
+      }}>
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Accueil',
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="home" size={24} color={color as string} />
+          ),
+        }}
+      />
 
-      <NativeTabs.Trigger name="explore">
-        <NativeTabs.Trigger.Label>Explorer</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/explore.png')}
-          renderingMode="template"
-        />
-      </NativeTabs.Trigger>
+      <Tabs.Screen
+        name="explore"
+        options={{
+          title: 'Explorer',
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="explore" size={24} color={color as string} />
+          ),
+        }}
+      />
 
-      <NativeTabs.Trigger name="upload">
-        <NativeTabs.Trigger.Label>Déposer</NativeTabs.Trigger.Label>
-      </NativeTabs.Trigger>
+      <Tabs.Screen
+        name="upload"
+        options={{
+          title: 'Déposer',
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="cloud-upload" size={24} color={color as string} />
+          ),
+        }}
+      />
 
-      <NativeTabs.Trigger name="favorites">
-        <NativeTabs.Trigger.Label>Favoris</NativeTabs.Trigger.Label>
-      </NativeTabs.Trigger>
+      <Tabs.Screen
+        name="favorites"
+        options={{
+          title: 'Favoris',
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="bookmark" size={24} color={color as string} />
+          ),
+        }}
+      />
 
-      <NativeTabs.Trigger name="profile">
-        <NativeTabs.Trigger.Label>Profil</NativeTabs.Trigger.Label>
-      </NativeTabs.Trigger>
-    </NativeTabs>
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profil',
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="person" size={24} color={color as string} />
+          ),
+        }}
+      />
+    </Tabs>
   );
 }
